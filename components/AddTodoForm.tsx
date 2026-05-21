@@ -44,6 +44,7 @@ export function AddTodoForm({ onAdd }: AddTodoFormProps) {
           onKeyDown={handleKeyDown}
           placeholder="What needs to be done?"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          style={{ color: '#121212' }}
         />
         <p className="mt-1 text-xs text-gray-500">Press Cmd+Enter to submit</p>
       </div>
