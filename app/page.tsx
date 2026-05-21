@@ -53,7 +53,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4">
+    <div className="min-h-screen bg-slate-100 py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <header className="text-center mb-10">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
