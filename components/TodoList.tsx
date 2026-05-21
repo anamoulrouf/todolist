@@ -1,6 +1,7 @@
 'use client';
 
-import { Color } from './DatePicker';
+import { useState, useMemo } from 'react';
+import type { Color } from './DatePicker';
 import { TodoItem } from './TodoItem';
 
 export interface Todo {
@@ -13,6 +14,7 @@ export interface Todo {
 }
 
 type FilterType = 'all' | 'active' | 'completed';
+type SortOption = 'dueDate-asc' | 'dueDate-desc' | 'created-desc' | 'created-asc' | 'color';
 
 interface TodoListProps {
   todos: Todo[];
@@ -24,6 +26,14 @@ interface TodoListProps {
   onClearCompleted: () => void;
 }
 
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'dueDate-asc', label: 'Due Date ↑' },
+  { value: 'dueDate-desc', label: 'Due Date ↓' },
+  { value: 'created-desc', label: 'Newest First' },
+  { value: 'created-asc', label: 'Oldest First' },
+  { value: 'color', label: 'Color' },
+];
+
 export function TodoList({
   todos,
   onToggle,
@@ -34,88 +44,125 @@ export function TodoList({
   onClearCompleted,
 }: TodoListProps) {
   const [filter, setFilter] = useState<FilterType>('all');
+  const [sortBy, setSortBy] = useState<SortOption>('created-desc');
 
-  const filteredTodos = todos.filter((todo) => {
-    if (filter === 'active') return !todo.completed;
-    if (filter === 'completed') return todo.completed;
-    return true;
-  });
+  // Filter and sort todos
+  const processedTodos = useMemo(() => {
+    let filtered = todos;
+
+    // Apply filter
+    if (filter === 'active') {
+      filtered = filtered.filter((t) => !t.completed);
+    } else if (filter === 'completed') {
+      filtered = filtered.filter((t) => t.completed);
+    }
+
+    // Apply sort
+    const sorted = [...filtered];
+    switch (sortBy) {
+      case 'dueDate-asc':
+        sorted.sort((a, b) => {
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        });
+        break;
+      case 'dueDate-desc':
+        sorted.sort((a, b) => {
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+          return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
+        });
+        break;
+      case 'created-desc':
+        sorted.sort((a, b) => b.createdAt - a.createdAt);
+        break;
+      case 'created-asc':
+        sorted.sort((a, b) => a.createdAt - b.createdAt);
+        break;
+      case 'color':
+        sorted.sort((a, b) => a.color.name.localeCompare(b.color.name));
+        break;
+    }
+
+    return sorted;
+  }, [todos, filter, sortBy]);
 
   const activeCount = todos.filter((t) => !t.completed).length;
   const completedCount = todos.filter((t) => t.completed).length;
 
   return (
     <div className="space-y-4">
+      {/* Toolbar */}
       {todos.length > 0 && (
         <div className="flex items-center justify-between">
-          <div className="flex gap-2">
+          {/* Apple-style segmented control */}
+          <div className="inline-flex p-1 bg-[var(--bg-tertiary)] rounded-lg">
             <button
               onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
                 filter === 'all'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
-              All ({todos.length})
+              All
             </button>
             <button
               onClick={() => setFilter('active')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
                 filter === 'active'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
-              Active ({activeCount})
+              Active
             </button>
             <button
               onClick={() => setFilter('completed')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
                 filter === 'completed'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-[var(--bg-secondary)] text-[var(--text-primary)] shadow-sm'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
-              Completed ({completedCount})
+              Completed
             </button>
           </div>
 
-          {completedCount > 0 && (
-            <button
-              onClick={onClearCompleted}
-              className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-            >
-              Clear Completed
-            </button>
-          )}
+          {/* Sort dropdown */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="px-3 py-1.5 text-sm bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--accent)] text-[var(--text-primary)]"
+          >
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
-      {filteredTodos.length === 0 ? (
-        <div className="text-center py-12">
-          <svg
-            className="w-16 h-16 mx-auto text-gray-300 mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-            />
-          </svg>
-          <p className="text-gray-500 text-lg">
-            {filter === 'completed' && 'No completed tasks yet'}
+      {/* Empty state */}
+      {processedTodos.length === 0 ? (
+        <div className="text-center py-16">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
+            <svg className="w-8 h-8 text-[var(--text-secondary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <p className="text-[var(--text-secondary)]">
+            {filter === 'completed' && 'No completed tasks'}
             {filter === 'active' && 'No active tasks'}
-            {filter === 'all' && 'No tasks yet. Add one above!'}
+            {filter === 'all' && 'No reminders yet'}
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {filteredTodos.map((todo) => (
+        /* Todo list */
+        <div className="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
+          {processedTodos.map((todo, index) => (
             <TodoItem
               key={todo.id}
               id={todo.id}
@@ -132,8 +179,18 @@ export function TodoList({
           ))}
         </div>
       )}
+
+      {/* Footer actions */}
+      {completedCount > 0 && (
+        <div className="flex justify-center">
+          <button
+            onClick={onClearCompleted}
+            className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+          >
+            Clear {completedCount} completed
+          </button>
+        </div>
+      )}
     </div>
   );
 }
-
-import { useState } from 'react';

@@ -3,31 +3,32 @@
 import { useState, useEffect } from 'react';
 import type { Color } from './DatePicker';
 
-const PREDEFINED_COLORS: Color[] = [
-  { name: 'Red', hex: '#ef4444' },
-  { name: 'Orange', hex: '#f97316' },
-  { name: 'Amber', hex: '#f59e0b' },
-  { name: 'Green', hex: '#22c55e' },
-  { name: 'Teal', hex: '#14b8a6' },
-  { name: 'Blue', hex: '#3b82f6' },
-  { name: 'Indigo', hex: '#6366f1' },
-  { name: 'Purple', hex: '#a855f7' },
-  { name: 'Pink', hex: '#ec4899' },
-  { name: 'Gray', hex: '#6b7280' },
+const APPLE_COLORS: Color[] = [
+  { name: 'Red', hex: '#FF3B30' },
+  { name: 'Orange', hex: '#FF9500' },
+  { name: 'Yellow', hex: '#FFCC00' },
+  { name: 'Green', hex: '#34C759' },
+  { name: 'Teal', hex: '#5AC8FA' },
+  { name: 'Blue', hex: '#007AFF' },
+  { name: 'Indigo', hex: '#5856D6' },
+  { name: 'Purple', hex: '#AF52DE' },
+  { name: 'Pink', hex: '#FF2D55' },
+  { name: 'Gray', hex: '#8E8E93' },
 ];
 
 interface ColorPickerProps {
   selectedColor: Color;
   onColorChange: (color: Color) => void;
+  compact?: boolean;
 }
 
-export function ColorPicker({ selectedColor, onColorChange }: ColorPickerProps) {
-  const [customColor, setCustomColor] = useState('#3b82f6');
+export function ColorPicker({ selectedColor, onColorChange, compact = false }: ColorPickerProps) {
+  const [customColor, setCustomColor] = useState('#007AFF');
   const [colorName, setColorName] = useState('');
   const [showCustom, setShowCustom] = useState(false);
 
   useEffect(() => {
-    if (!PREDEFINED_COLORS.find(c => c.hex === selectedColor.hex)) {
+    if (!APPLE_COLORS.find(c => c.hex === selectedColor.hex)) {
       setCustomColor(selectedColor.hex);
       setColorName(selectedColor.name);
       setShowCustom(true);
@@ -59,64 +60,64 @@ export function ColorPicker({ selectedColor, onColorChange }: ColorPickerProps) 
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {PREDEFINED_COLORS.map((color) => (
+    <div className={compact ? '' : 'space-y-3'}>
+      <div className={`flex ${compact ? 'gap-1.5' : 'flex-wrap gap-2'}`}>
+        {APPLE_COLORS.map((color) => (
           <button
             key={color.hex}
             onClick={() => handlePredefinedClick(color)}
-            className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 ${
+            className={`transition-transform hover:scale-110 ${
               selectedColor.hex === color.hex && !showCustom
-                ? 'border-gray-900 ring-2 ring-gray-300'
-                : 'border-gray-200'
+                ? 'ring-2 ring-offset-2 ring-[var(--accent)]'
+                : ''
             }`}
-            style={{ backgroundColor: color.hex }}
+            style={{
+              width: compact ? '20px' : '28px',
+              height: compact ? '20px' : '28px',
+              borderRadius: '50%',
+              backgroundColor: color.hex,
+            }}
             title={color.name}
             aria-label={`Select ${color.name}`}
           />
         ))}
         <button
           onClick={useCustomColor}
-          className={`w-8 h-8 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center ${
-            showCustom ? 'border-gray-900 ring-2 ring-gray-300' : 'border-gray-200'
+          className={`flex items-center justify-center transition-transform hover:scale-110 ${
+            showCustom ? 'ring-2 ring-offset-2 ring-[var(--accent)]' : ''
           }`}
-          style={{ backgroundColor: customColor }}
+          style={{
+            width: compact ? '20px' : '28px',
+            height: compact ? '20px' : '28px',
+            borderRadius: '50%',
+            backgroundColor: customColor,
+          }}
           title="Custom color"
           aria-label="Select custom color"
         >
-          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className={`text-white ${compact ? 'w-3 h-3' : 'w-4 h-4'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
         </button>
       </div>
 
-      {showCustom && (
-        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+      {showCustom && !compact && (
+        <div className="flex items-center gap-2 p-2 bg-[var(--bg-tertiary)] rounded-lg">
           <input
             type="color"
             value={customColor}
             onChange={handleCustomColorChange}
-            className="w-10 h-10 rounded cursor-pointer border-0"
+            className="w-8 h-8 rounded cursor-pointer border-0"
             aria-label="Choose custom color"
           />
           <input
             type="text"
             value={colorName}
             onChange={handleColorNameChange}
-            placeholder="Color name (e.g., Work Urgent)"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="Color name"
+            className="flex-1 px-2 py-1 text-sm bg-transparent border border-[var(--border-color)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent)] text-[var(--text-primary)]"
             aria-label="Color name"
           />
-        </div>
-      )}
-
-      {selectedColor.name && (
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <span
-            className="w-4 h-4 rounded"
-            style={{ backgroundColor: selectedColor.hex }}
-          />
-          <span>{selectedColor.name}</span>
         </div>
       )}
     </div>
