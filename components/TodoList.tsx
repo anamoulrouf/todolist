@@ -11,6 +11,8 @@ export interface Todo {
   createdAt: number;
   color: Color;
   dueDate?: string;
+  description?: string;
+  starred?: boolean;
 }
 
 type FilterType = 'all' | 'active' | 'completed';
@@ -24,6 +26,10 @@ interface TodoListProps {
   onColorChange: (id: string, color: Color) => void;
   onDueDateChange: (id: string, dueDate: string | undefined) => void;
   onClearCompleted: () => void;
+  onColorSelect?: (color: Color) => void;
+  onStarToggle?: (id: string) => void;
+  onDescriptionChange?: (id: string, description: string) => void;
+  recentColors?: Color[];
 }
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
@@ -42,6 +48,10 @@ export function TodoList({
   onColorChange,
   onDueDateChange,
   onClearCompleted,
+  onColorSelect,
+  onStarToggle,
+  onDescriptionChange,
+  recentColors = [],
 }: TodoListProps) {
   const [filter, setFilter] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortOption>('created-desc');
@@ -161,22 +171,30 @@ export function TodoList({
         </div>
       ) : (
         /* Todo list */
-        <div className="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] shadow-sm overflow-hidden">
-          {processedTodos.map((todo, index) => (
-            <TodoItem
-              key={todo.id}
-              id={todo.id}
-              text={todo.text}
-              completed={todo.completed}
-              color={todo.color}
-              dueDate={todo.dueDate}
-              onToggle={onToggle}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onColorChange={onColorChange}
-              onDueDateChange={onDueDateChange}
-            />
-          ))}
+        <div className="bg-[var(--bg-secondary)] rounded-xl border border-[var(--border-color)] shadow-sm">
+          <div className="divide-y divide-[var(--border-color)]">
+            {processedTodos.map((todo, index) => (
+              <TodoItem
+                key={todo.id}
+                id={todo.id}
+                text={todo.text}
+                completed={todo.completed}
+                color={todo.color}
+                dueDate={todo.dueDate}
+                description={todo.description}
+                starred={todo.starred}
+                onToggle={onToggle}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onColorChange={onColorChange}
+                onDueDateChange={onDueDateChange}
+                onColorSelect={onColorSelect}
+                onStarToggle={onStarToggle}
+                onDescriptionChange={onDescriptionChange}
+                recentColors={recentColors}
+              />
+            ))}
+          </div>
         </div>
       )}
 

@@ -8,9 +8,10 @@ export interface Color {
 interface DatePickerProps {
   dueDate: string | undefined;
   onDateChange: (date: string | undefined) => void;
+  showTodayButton?: boolean;
 }
 
-export function DatePicker({ dueDate, onDateChange }: DatePickerProps) {
+export function DatePicker({ dueDate, onDateChange, showTodayButton = true }: DatePickerProps) {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     onDateChange(value || undefined);
@@ -54,13 +55,15 @@ export function DatePicker({ dueDate, onDateChange }: DatePickerProps) {
           className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           aria-label="Due date"
         />
-        <button
-          type="button"
-          onClick={setToday}
-          className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-        >
-          Today
-        </button>
+        {showTodayButton && (
+          <button
+            type="button"
+            onClick={setToday}
+            className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+          >
+            Today
+          </button>
+        )}
         {dueDate && (
           <button
             type="button"

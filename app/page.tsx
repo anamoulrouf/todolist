@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useDarkMode } from '@/hooks/useDarkMode';
+import { useRecentColors } from '@/hooks/useRecentColors';
 import { AddTodoForm } from '@/components/AddTodoForm';
 import { TodoList, Todo } from '@/components/TodoList';
 import { DarkModeToggle } from '@/components/DarkModeToggle';
@@ -12,10 +13,11 @@ import { exportTodos, importTodos } from '@/lib/backup';
 export default function Home() {
   const [todos, setTodos, isLoaded] = useLocalStorage<Todo[]>('todos', []);
   const { isDark, toggle: toggleDarkMode } = useDarkMode();
+  const { recentColors, addColor } = useRecentColors();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
 
-  const addTodo = (text: string, color: Color, dueDate?: string) => {
+  const addTodo = (text: string, color: Color, dueDate?: string, description?: string, starred?: boolean) => {
     const newTodo: Todo = {
       id: Date.now().toString(),
       text,
@@ -23,6 +25,8 @@ export default function Home() {
       createdAt: Date.now(),
       color,
       dueDate,
+      description,
+      starred: starred || false,
     };
     setTodos([...todos, newTodo]);
   };
@@ -52,6 +56,18 @@ export default function Home() {
   const updateDueDate = (id: string, dueDate: string | undefined) => {
     setTodos(todos.map((todo) =>
       todo.id === id ? { ...todo, dueDate } : todo
+    ));
+  };
+
+  const toggleStar = (id: string) => {
+    setTodos(todos.map((todo) =>
+      todo.id === id ? { ...todo, starred: !todo.starred } : todo
+    ));
+  };
+
+  const updateDescription = (id: string, description: string) => {
+    setTodos(todos.map((todo) =>
+      todo.id === id ? { ...todo, description } : todo
     ));
   };
 
@@ -147,7 +163,7 @@ export default function Home() {
         ) : (
           <>
             {/* Add todo form */}
-            <AddTodoForm onAdd={addTodo} />
+            <AddTodoForm onAdd={addTodo} onColorSelect={addColor} />
 
             {/* Todo list */}
             <div className="mt-6">
@@ -159,6 +175,10 @@ export default function Home() {
                 onColorChange={updateColor}
                 onDueDateChange={updateDueDate}
                 onClearCompleted={clearCompleted}
+                onColorSelect={addColor}
+                onStarToggle={toggleStar}
+                onDescriptionChange={updateDescription}
+                recentColors={recentColors}
               />
             </div>
           </>
