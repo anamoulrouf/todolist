@@ -52,14 +52,17 @@ export function DatePicker({ dueDate, onDateChange, showTodayButton = true }: Da
           type="date"
           value={dueDate || ''}
           onChange={handleDateChange}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="px-3 py-2 border border-[var(--border-color)] rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--accent)] text-[var(--text-primary)] bg-[var(--bg-tertiary)]"
+          style={{
+            colorScheme: 'light'
+          }}
           aria-label="Due date"
         />
         {showTodayButton && (
           <button
             type="button"
             onClick={setToday}
-            className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+            className="px-3 py-2 text-sm bg-[var(--bg-tertiary)] hover:bg-[var(--border-color)] rounded-md transition-colors text-[var(--text-primary)]"
           >
             Today
           </button>
@@ -68,7 +71,7 @@ export function DatePicker({ dueDate, onDateChange, showTodayButton = true }: Da
           <button
             type="button"
             onClick={clearDate}
-            className="px-3 py-2 text-sm bg-red-100 hover:bg-red-200 text-red-700 rounded-md transition-colors"
+            className="px-3 py-2 text-sm bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-md transition-colors"
           >
             Clear
           </button>

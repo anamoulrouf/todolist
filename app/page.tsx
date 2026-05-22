@@ -2,20 +2,20 @@
 
 import { useRef, useState } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { useDarkMode } from '@/hooks/useDarkMode';
 import { useRecentColors } from '@/hooks/useRecentColors';
-import { AddTodoForm } from '@/components/AddTodoForm';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { AddTodoModal } from '@/components/AddTodoModal';
 import { TodoList, Todo } from '@/components/TodoList';
-import { DarkModeToggle } from '@/components/DarkModeToggle';
 import { Color } from '@/components/DatePicker';
 import { exportTodos, importTodos } from '@/lib/backup';
 
 export default function Home() {
   const [todos, setTodos, isLoaded] = useLocalStorage<Todo[]>('todos', []);
-  const { isDark, toggle: toggleDarkMode } = useDarkMode();
   const { recentColors, addColor } = useRecentColors();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fabRef = useRef<HTMLButtonElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const addTodo = (text: string, color: Color, dueDate?: string, description?: string, starred?: boolean) => {
     const newTodo: Todo = {
@@ -142,9 +142,6 @@ export default function Home() {
               onChange={handleImport}
               className="hidden"
             />
-
-            {/* Dark mode toggle */}
-            <DarkModeToggle isDark={isDark} onToggle={toggleDarkMode} />
           </div>
         </header>
 
@@ -162,9 +159,6 @@ export default function Home() {
           </div>
         ) : (
           <>
-            {/* Add todo form */}
-            <AddTodoForm onAdd={addTodo} onColorSelect={addColor} />
-
             {/* Todo list */}
             <div className="mt-6">
               <TodoList
@@ -183,6 +177,22 @@ export default function Home() {
             </div>
           </>
         )}
+
+        {/* Floating Action Button */}
+        <FloatingActionButton
+          ref={fabRef}
+          onClick={() => setIsModalOpen(true)}
+          isOpen={isModalOpen}
+        />
+
+        {/* Add Todo Modal */}
+        <AddTodoModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onAdd={addTodo}
+          onColorSelect={addColor}
+          triggerRef={fabRef}
+        />
 
         {/* Footer */}
         <footer className="mt-12 text-center">
